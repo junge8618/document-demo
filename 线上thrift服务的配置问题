@@ -1,0 +1,28 @@
+问题现象
+ 有客户反馈我们的产品有时反应很慢，处理会出现超时。
+ 
+问题分析过程
+ 1.第一反应可能是用户增加，并发量太大了，询问了运营，最近用户注册数据并没有猛增。
+ 
+ 2.分析access日志，发现有隔一段时间会出现几个连续的请求响应时长超过30秒，并且这些请求都是使用一个thrift服务的，而连redis和其他thrift服务的请求没有出现
+  延迟的情况，问题出现在该thrift服务。
+  分析1）分析该thrift服务的日志，发现接口出现超时的这段时间，该thrift没有打印日志，也就是没有处理请求。这时怀疑是什么资源用完了，首先想到的是数据库连接
+        池，该服务是多数据源的，并且每个数据库连接池配置的都比较大，不可能出现连接池使用完的情况；也不可能出现一个数据库的连接用完，影响其他数据库连接。
+  分析2）thrift客户端配置的连接池使用完了？也不可能，前2天生产环境也把客户端连接池配的比较大，按现在的用户数来说够用了。
+  分析3）自己写工具抽取了access日志中耗时超过20秒的所有请求，发现请求耗时多的请求都是成堆连续出现，并且第一个请求都是请求报表接口，查看thrift服务这些报
+        表接口有些用户数据很大，有的sql要30多秒。得出的结论是报表接口查询阻塞了其它thrift接口，那原因又是什么呢？跟技术总监聊了这个问题，他让我们看一下
+        thrift服务端处理请求的线程数。
+  分析4）查看thrift服务端处理的代码，org.apache.thrift.server.TThreadedSelectorServer.Args中默认配置的处理请求线程数是5，如果上面说的报表接口连续请
+        求5次，就会出现报表请求阻塞其他请求的现象。在开发环境模拟重现了该问题。
+   /** The number of threads for selecting on already-accepted connections */
+    public int selectorThreads = 2;
+    /**
+     * The size of the executor service (if none is specified) that will handle
+     * invocations. This may be set to 0, in which case invocations will be
+     * handled directly on the selector threads (as is in TNonblockingServer)
+     */
+    private int workerThreads = 5;
+    
+解决方案
+1.调整框架，把工作线程抽取出来作为可配置参数，生产环境按需调整该参数。
+2.把请求耗时的接口抽成一个单独的thrift服务，即使报表sql耗时，请求超时也不影响其他业务接口。
