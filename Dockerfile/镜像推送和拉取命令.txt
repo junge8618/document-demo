@@ -1,0 +1,14 @@
+登录：docker login --username=513851613@qq.com registry.cn-hangzhou.aliyuncs.com
+
+推送：
+#jdk8-alpine同步
+docker tag 630f12001627 registry.cn-hangzhou.aliyuncs.com/junge8618/jdk8-alpine:v1.0
+docker push registry.cn-hangzhou.aliyuncs.com/junge8618/jdk8-alpine:v1.0
+
+#jdk8-centos同步
+docker tag 9ceb9f4f9848 registry.cn-hangzhou.aliyuncs.com/junge8618/jdk8-centos:v1.0
+docker push registry.cn-hangzhou.aliyuncs.com/junge8618/jdk8-centos:v1.0
+
+拉取：
+docker pull registry.cn-hangzhou.aliyuncs.com/junge8618/jdk8-alpine
+docker pull registry.cn-hangzhou.aliyuncs.com/junge8618/jdk8-centos
