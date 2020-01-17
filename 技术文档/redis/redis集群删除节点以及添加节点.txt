@@ -1,13 +1,13 @@
 查看集群信息
-./redis-trib.rb info 192.168.20.66:7301
+./redis-trib.rb info 192.168.20.153:7301
 
 删除节点
-./redis-trib.rb del-node 192.168.20.66:7301 74edf41be19dc64abd3aa940b6a9ff177aaf0986
-./redis-trib.rb del-node 192.168.20.66:7301 cbec44939f921ff39c933c2a1daeb0c1c15285e3
+./redis-trib.rb del-node 192.168.20.153:7301 68bead5cf13d2dafbfc4417bbd6ef14ac0bd2fd1
+./redis-trib.rb del-node 192.168.20.153:7301 c85d9cb008fac404a504bcc6e89c1a061021be00
 
 --注意：删除节点后，服务会自动停止
 
 加入节点前需要删除aof/rdb/nodes-xxx.conf文件，再启动redis服务
 
-./redis-trib.rb add-node --slave --master-id 709a4e110b9af5302fcfe135e7326c1171a40dce 192.168.20.66:7302 192.168.20.66:7301
-./redis-trib.rb add-node --slave --master-id 71ddddb5495e8dbc2b49006c8f29aecded116b8d 192.168.20.67:7302 192.168.20.66:7301
+./redis-trib.rb add-node --slave --master-id ec25cc9e5562ca2fb5b1fcf6f0d74b33dc129361 192.168.20.153:7302 192.168.20.153:7301
+./redis-trib.rb add-node --slave --master-id f039743b83882a992cab4f21d8471f9c0ed82fde 192.168.20.165:7302 192.168.20.153:7301
